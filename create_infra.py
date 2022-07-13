@@ -10,7 +10,6 @@ from azure.mgmt.iothub import IotHubClient
 import logging
 
 logger = logging.getLogger(__name__)
-#logger.basicConfig(filename="pythonlog.txt", level=logging.INFO)
 
 logFormatter = logging.Formatter("%(asctime)s [%(threadName)-12.12s] [%(levelname)-5.5s]  %(message)s")
 
@@ -18,22 +17,11 @@ fileHandler = logging.FileHandler("./{0}.log".format('pythonlog'))
 fileHandler.setFormatter(logFormatter)
 logger.addHandler(fileHandler)
 
-#DO NOT ENABLE THIS IN PROD!!!!!!!!!!!!!
-#SINCE WE NEED TO RETURN ONLY THE IOT PRY KEY that it is grabbed by the script
 consoleHandler = logging.StreamHandler()
 consoleHandler.setFormatter(logFormatter)
 logger.addHandler(consoleHandler)
 
 logger.setLevel(logging.INFO)
-
-# logger.basicConfig(
-#     level=logging.INFO,
-#     format="%(asctime)s [%(levelname)s] %(message)s",
-#     handlers=[
-#         logging.FileHandler("pythonlog.txt"),
-#         logging.StreamHandler()
-#     ]
-# )
 
 def createIotHub(credentials, subscription_id, resource_group_name, location, iot_hub_name, iot_sku, iot_capacity):
     logger.info("create iothub..")
@@ -69,16 +57,34 @@ def createIotHub(credentials, subscription_id, resource_group_name, location, io
     return (iot_hub_resource.id,shared_access_signature.primary_key)
 
 class DataExplorer:
+    class SkuTypes:
+        class SkuType:
+            def __init__(self, tier, capacity) -> None:
+                self.tier = tier
+                self.capacity = capacity
+        def __init__(self) -> None:
+            self._skus ={}
+            self._skus["Standard_L8as_v3"] = self.SkuType( "Standard", 2)
+            self._skus["Dev(No SLA)_Standard_E2a_v4"] = self.SkuType( "Basic", 1)
+        def getTier(self, name):
+            return self._skus[name].tier
+        def getCapacity(self,name):
+             return self._skus[name].capacity
+
+
     def __init__(self, credentials, subscription_id, resource_group_name, location, cluster_name, database_name ):
         self._kusto_management_client = KustoManagementClient(credentials, subscription_id)
         self._resource_group_name = resource_group_name
         self._location = location
         self._cluster_name = cluster_name
         self._database_name = database_name
+        self._skuTypes= self.SkuTypes()
+
     
-    def create_cluster(self, sku_name, capacity, tier):
-        logger.info("create cluster..")
-        cluster = Cluster(location=self._location, sku=AzureSku(name=sku_name, capacity=capacity, tier=tier), enable_streaming_ingest=True)
+    def create_cluster(self, sku_name):
+        logger.info(f"create cluster.. tier: {self._skuTypes.getTier(sku_name)} capacity: {self._skuTypes.getCapacity(sku_name)}")
+        cluster = Cluster(location=self._location, sku=AzureSku(name=sku_name, capacity=self._skuTypes.getCapacity(sku_name), 
+                            tier=self._skuTypes.getTier(sku_name)), enable_streaming_ingest=True)
         poller = self._kusto_management_client.clusters.begin_create_or_update(self._resource_group_name, self._cluster_name, cluster)
         poller.wait()
         
@@ -169,6 +175,7 @@ def main():
     ap.add_argument("-cs", "--clientSecret", required=True, help="client secret")
     ap.add_argument("-s", "--subscriptionId", required=True, help="subscription id")
     ap.add_argument("-l", "--location", required=True, help="location")
+    ap.add_argument("-des", "--deSku", required=True, help="De Sku Name")
     ap.add_argument("-r", "--resourceGroup", required=True, help="resource group name")
     ap.add_argument("-cl", "--clusterName", required=True, help="cluster name")
     ap.add_argument("-d", "--databaseName", required=True, help="datbase name")
@@ -196,18 +203,15 @@ def main():
     (iot_hub_id, iot_hub_pk) = createIotHub(credentials, subscription_id, resource_group_name, 
                         args['iotLocation'], args['iotName'], args['iotSku'], args['iotCapacity'])
     
+    #this file is going to be parsed by the aziotcia script 
     with open('iot_primary_key.txt', 'w') as f:
         print(iot_hub_pk, file=f)
 
-    #TOREMOVE!!!!!
-    sku_name = 'Dev(No SLA)_Standard_E2a_v4'
-    capacity = 1
-    tier = "Basic"
-    #############    
+        
     if (args['deIsEnabled'].lower() == 'true'):
         logger.info("DE ENABLED")
         data_explorer = DataExplorer(credentials, subscription_id, resource_group_name, args['location'], args['clusterName'], args['databaseName'])
-        data_explorer.create_cluster(sku_name, capacity, tier)
+        data_explorer.create_cluster(args['deSku'])
         data_explorer.create_db( args['deSoftPeriod'])
         data_explorer.run_script()
         data_explorer.addIotConnection(iot_hub_id)
@@ -215,10 +219,6 @@ def main():
     else:
         logger.info("DE DISABLED")
 
-    #DO NOT REMOVE
-    #SCRIPT HAS TO RETURN THE PRIMARY KEY
-
-    #print(f"{iot_hub_pk}")
 
 if __name__ == '__main__':
     try: 

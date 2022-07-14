@@ -58,18 +58,36 @@ def createIotHub(credentials, subscription_id, resource_group_name, location, io
 
 class DataExplorer:
     class SkuTypes:
+
         class SkuType:
-            def __init__(self, tier, capacity) -> None:
-                self.tier = tier
-                self.capacity = capacity
+            no_sla_standard = "Dev(No SLA)_Standard_E2"
+            standard_8 = 'Standard_L8'
+
+            def __init__(self, name, tier, capacity) -> None:
+                self._name = name
+                self._tier = tier
+                self._capacity = capacity
+        
         def __init__(self) -> None:
-            self._skus ={}
-            self._skus["Standard_L8as_v3"] = self.SkuType( "Standard", 2)
-            self._skus["Dev(No SLA)_Standard_E2a_v4"] = self.SkuType( "Basic", 1)
-        def getTier(self, name):
-            return self._skus[name].tier
-        def getCapacity(self,name):
-             return self._skus[name].capacity
+            self._region = {
+                'australia east' : {  self.SkuType.no_sla_standard :  self.SkuType("Dev(No SLA)_Standard_E2a_v4", "Basic", 1),
+                                       self.SkuType.standard_8 : self.SkuType("Standard_E8as_v4+1TB_PS", "Standard", 2)
+                                    },
+                'central us' : {  self.SkuType.no_sla_standard :  self.SkuType("Dev(No SLA)_Standard_E2a_v4", "Basic", 1),
+                                   self.SkuType.standard_8 : self.SkuType("Standard_L8as_v3", "Standard", 2)
+                                },
+                'uk south' : {  self.SkuType.no_sla_standard :  self.SkuType("Dev(No SLA)_Standard_E2a_v4", "Basic", 1),
+                                   self.SkuType.standard_8 : self.SkuType("Standard_L8s_v3", "Standard", 2)
+                                }
+            }
+
+        
+        def getTier(self, region, type):
+            return self._region[region.lower()][type]._tier
+        def getCapacity(self, region, type):
+             return self._region[region.lower()][type]._capacity
+        def getFullName(self, region, type):
+             return self._region[region.lower()][type]._name
 
 
     def __init__(self, credentials, subscription_id, resource_group_name, location, cluster_name, database_name ):
@@ -82,9 +100,15 @@ class DataExplorer:
 
     
     def create_cluster(self, sku_name):
-        logger.info(f"create cluster.. tier: {self._skuTypes.getTier(sku_name)} capacity: {self._skuTypes.getCapacity(sku_name)}")
-        cluster = Cluster(location=self._location, sku=AzureSku(name=sku_name, capacity=self._skuTypes.getCapacity(sku_name), 
-                            tier=self._skuTypes.getTier(sku_name)), enable_streaming_ingest=True)
+        tier = self._skuTypes.getTier(self._location, sku_name)
+        capacity = self._skuTypes.getCapacity(self._location, sku_name)
+        fullname = self._skuTypes.getFullName(self._location, sku_name)
+
+        logger.info(f"create cluster.. tier: {tier} capacity: {capacity} fullname: {fullname}")
+        cluster = Cluster(
+            location=self._location, 
+            sku=AzureSku(name=fullname, capacity=capacity, tier=tier), 
+            enable_streaming_ingest=True)
         poller = self._kusto_management_client.clusters.begin_create_or_update(self._resource_group_name, self._cluster_name, cluster)
         poller.wait()
         

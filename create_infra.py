@@ -60,7 +60,7 @@ class DataExplorer:
     class SkuTypes:
 
         class SkuType:
-            no_sla_standard = "Dev(No SLA)_Standard_E2"
+            no_sla_standard = "Dev(No_SLA)_Standard_E2"
             standard_8 = 'Standard_L8'
 
             def __init__(self, name, tier, capacity) -> None:

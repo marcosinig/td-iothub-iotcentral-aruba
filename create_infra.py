@@ -70,24 +70,24 @@ class DataExplorer:
         
         def __init__(self) -> None:
             self._region = {
-                'australia east' : {  self.SkuType.no_sla_standard :  self.SkuType("Dev(No SLA)_Standard_E2a_v4", "Basic", 1),
+                'australiaeast' : {  self.SkuType.no_sla_standard :  self.SkuType("Dev(No SLA)_Standard_E2a_v4", "Basic", 1),
                                        self.SkuType.standard_8 : self.SkuType("Standard_E8as_v4+1TB_PS", "Standard", 2)
                                     },
-                'central us' : {  self.SkuType.no_sla_standard :  self.SkuType("Dev(No SLA)_Standard_E2a_v4", "Basic", 1),
+                'centralus' : {  self.SkuType.no_sla_standard :  self.SkuType("Dev(No SLA)_Standard_E2a_v4", "Basic", 1),
                                    self.SkuType.standard_8 : self.SkuType("Standard_L8as_v3", "Standard", 2)
                                 },
-                'uk south' : {  self.SkuType.no_sla_standard :  self.SkuType("Dev(No SLA)_Standard_E2a_v4", "Basic", 1),
+                'uksouth' : {  self.SkuType.no_sla_standard :  self.SkuType("Dev(No SLA)_Standard_E2a_v4", "Basic", 1),
                                    self.SkuType.standard_8 : self.SkuType("Standard_L8s_v3", "Standard", 2)
                                 }
             }
 
         
         def getTier(self, region, type):
-            return self._region[region.lower()][type]._tier
+            return self._region[region.lower().strip()][type]._tier
         def getCapacity(self, region, type):
-             return self._region[region.lower()][type]._capacity
+             return self._region[region.lower().strip()][type]._capacity
         def getFullName(self, region, type):
-             return self._region[region.lower()][type]._name
+             return self._region[region.lower().strip()][type]._name
 
 
     def __init__(self, credentials, subscription_id, resource_group_name, location, cluster_name, database_name ):

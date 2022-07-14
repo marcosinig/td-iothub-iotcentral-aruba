@@ -57,7 +57,7 @@ if [ $IS_IOTHUB_DEPLOY_STR == "true" ];then
   python3 create_infra.py -t $AZURE_TENANT_ID -c $AZURE_CLIENT_ID -cs $AZURE_CLIENT_SECRET \
                 -s $AZURE_SUBSCRIPTION_ID -l $DE_LOCATION -r $RESOURCE_GROUP_NAME -cl $DE_CLUSTER_NAME -d $DE_DB_NAME \
                 -p $USER_OBJECT_ID -e $USER_EMAIL -iotname $IOT_HUB_HOST_NAME  -iotsku $IOT_HUB_SKU -iotcap $IOT_CAPACITY \
-                -desoft $DE_SOFT_DELETE_PERIOD -deisen $DE_IS_ENABLED -iotloc $IOT_HUB_LOCATION des $DE_SKU
+                -desoft $DE_SOFT_DELETE_PERIOD -deisen $DE_IS_ENABLED -iotloc $IOT_HUB_LOCATION -des $DE_SKU
   IOT_HUB_PRIMARY_KEY=$(<iot_primary_key.txt)
   IOT_HUB_CONNECTION_STRING=$(printf "HostName=%s;SharedAccessKeyName=iothubowner;SharedAccessKey=%s" "$IOT_HUB_HOST_NAME" "$IOT_HUB_PRIMARY_KEY")
 else

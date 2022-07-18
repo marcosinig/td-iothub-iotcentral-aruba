@@ -131,7 +131,7 @@ class DataExplorer:
         script = Script(
             script_content=".create-merge table iot_parsed (IotHubDeviceId:string,Timestamp:datetime,Temperature:real,Humidity:real,Contact:bool,MagnetContact:bool,\
                 Illumination:int,Acceleration_X:real,Acceleration_Y:real,Acceleration_Z:real,AccelerationStatus:int,Button_A0:bool,Button_AI:bool,Mutton_B0:bool,Button_BI:bool,\
-                Button_B0:bool, Type:string)\n\n\
+                Button_B0:bool, Type:string, Location:string)\n\n\
                 .alter table iot_parsed policy streamingingestion enable\n\n\
                  .create-or-alter table ['iot_parsed'] ingestion json mapping 'iot_parsed_mapping' '[\
                 '\n'{\"column\":\"Timestamp\",\"path\":\"$.objectLastUpdated\",\"datatype\":\"datetime\"},\
@@ -149,7 +149,8 @@ class DataExplorer:
                 '\n'{\"column\":\"Button_A0\",\"path\":\"$.button_A0\",\"datatype\":\"bool\"},\
                 '\n'{\"column\":\"Button_AI\",\"path\":\"$.button_AI\",\"datatype\":\"bool\"},\
                 '\n'{\"column\":\"Button_B0\",\"path\":\"$.button_B0\",\"datatype\":\"bool\"},\
-                '\n'{\"column\":\"Button_BI\",\"path\":\"$.button_BI\",\"datatype\":\"bool\"}\
+                '\n'{\"column\":\"Button_BI\",\"path\":\"$.button_BI\",\"datatype\":\"bool\"}\,\
+                '\n'{\"column\":\"Location\",\"path\":\"$.location\",\"datatype\":\"string\"}\
                 ]'" )
         poller = self._kusto_management_client.scripts.begin_create_or_update(resource_group_name =  self._resource_group_name, cluster_name = self._cluster_name, \
                         database_name = self._database_name, script_name= 'script1',

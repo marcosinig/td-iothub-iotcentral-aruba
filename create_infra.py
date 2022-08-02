@@ -129,29 +129,48 @@ class DataExplorer:
     def run_script(self):
         logger.info("add script..")
         script = Script(
-            script_content=".create-merge table iot_parsed (IotHubDeviceId:string,Timestamp:datetime,Temperature:real,Humidity:real,Contact:bool,MagnetContact:bool,\
-                Illumination:int,Acceleration_X:real,Acceleration_Y:real,Acceleration_Z:real,AccelerationStatus:int,Button_A0:bool,Button_AI:bool,Mutton_B0:bool,Button_BI:bool,\
-                Button_B0:bool, Type:string, Location:string)\n\n\
-                .alter table iot_parsed policy streamingingestion enable\n\n\
-                 .create-or-alter table ['iot_parsed'] ingestion json mapping 'iot_parsed_mapping' '[\
-                '\n'{\"column\":\"Timestamp\",\"path\":\"$.objectLastUpdated\",\"datatype\":\"datetime\"},\
-                '\n'{\"column\":\"IotHubDeviceId\",\"path\":\"$.iothub-connection-device-id\",\"datatype\":\"string\"},\
-                '\n'{\"column\":\"Type\",\"path\":\"$.type\",\"datatype\":\"string\"},\
-                '\n'{\"column\":\"Contact\",\"path\":\"$.contact\",\"datatype\":\"bool\"},\
-                '\n'{\"column\":\"MagnetContact\",\"path\":\"$.magnetContact\",\"datatype\":\"bool\"},\
-                '\n'{\"column\":\"Humidity\",\"path\":\"$.humidity\",\"datatype\":\"real\"},\
-                '\n'{\"column\":\"Temperature\",\"path\":\"$.temperature\",\"datatype\":\"real\"},\
-                '\n'{\"column\":\"Illumination\",\"path\":\"$.illumination\",\"datatype\":\"int\"},\
-                '\n'{\"column\":\"Acceleration_X\",\"path\":\"$.acceleration_X\",\"datatype\":\"real\"},\
-                '\n'{\"column\":\"Acceleration_Y\",\"path\":\"$.acceleration_Y\",\"datatype\":\"real\"},\
-                '\n'{\"column\":\"Acceleration_Z\",\"path\":\"$.acceleration_Z\",\"datatype\":\"real\"},\
-                '\n'{\"column\":\"AccelerationStatus\",\"path\":\"$.accelerationStatus\",\"datatype\":\"int\"},\
-                '\n'{\"column\":\"Button_A0\",\"path\":\"$.button_A0\",\"datatype\":\"bool\"},\
-                '\n'{\"column\":\"Button_AI\",\"path\":\"$.button_AI\",\"datatype\":\"bool\"},\
-                '\n'{\"column\":\"Button_B0\",\"path\":\"$.button_B0\",\"datatype\":\"bool\"},\
-                '\n'{\"column\":\"Button_BI\",\"path\":\"$.button_BI\",\"datatype\":\"bool\"}\,\
-                '\n'{\"column\":\"Location\",\"path\":\"$.location\",\"datatype\":\"string\"}\
-                ]'" )
+            
+            script_content=".create table IotUnparsedData(data:dynamic)\n\n\
+                .create-or-alter table ['IotUnparsedData'] ingestion json mapping 'iot_unparsed_mapping' '[\
+                    '\n'{\"column\":\"data\",\"path\":\"$\"}]'\n\n\
+                .alter-merge table IotUnparsedData policy retention softdelete = 7d \n\n\
+                .create table TempHumDevice(IotHubDeviceId: string, Timestamp: datetime, Location:string, Temperature:real,Humidity:real)\n\n\
+                .create-or-alter  function parseTempHumDevice(){\
+                    \nIotUnparsedData\
+                    \n| where data.['type'] == '0034'\
+                    \n| where isnotempty(data.['objectLastUpdated'])\
+                    \n| project IotHubDeviceId=tostring(data['iothub-connection-device-id']), Timestamp=todatetime(data['objectLastUpdated']), Location=tostring(data['location']), Temperature=toreal(data['temperature']), Humidity=toreal(data['humidity'])\
+                    \n}\n\n\
+                .alter table TempHumDevice policy update \n\
+                    @'[{ \"IsEnabled\": true, \"Source\": \"IotUnparsedData\", \"Query\": \"parseTempHumDevice()\", \"IsTransactional\": false, \"PropagateIngestionProperties\": false}]'\n\n\
+                .create table MagneticContactDevice(IotHubDeviceId: string, Timestamp: datetime,  Location:string, Contact: bool)\n\n\
+                    \n.create-or-alter  function parseMagneticContactDevice(){\
+                    \nIotUnparsedData\
+                    \n| where isnotempty(data.['objectLastUpdated'])\
+                    \n| where data.['type'] == '0033'\
+                    \n| project IotHubDeviceId=tostring(data['iothub-connection-device-id']), Timestamp=todatetime(data['objectLastUpdated']), Location=tostring(data['location']),  Contact=tobool(data['contact'])\
+                    \n}\n\n\
+                .alter table MagneticContactDevice policy update\n\
+                     @'[{ \"IsEnabled\": true, \"Source\": \"IotUnparsedData\", \"Query\": \"parseMagneticContactDevice()\", \"IsTransactional\": false, \"PropagateIngestionProperties\": false}]'\n\n\
+                .create table SwitchDevice(IotHubDeviceId: string, Timestamp: datetime, Location:string, Button_A0:bool, Button_AI:bool, Button_B0:bool, Button_BI:bool)\n\n\
+                .create-or-alter  function parseSwitchDevice(){\
+                    \nIotUnparsedData\
+                    \n| where isnotempty(data.['objectLastUpdated'])\
+                    \n| where data.['type'] == '000B'\
+                    \n| project IotHubDeviceId=tostring(data['iothub-connection-device-id']), Timestamp=todatetime(data['objectLastUpdated']), Location=tostring(data['location']), Button_A0=tobool(data['button_A0']),  Button_AI=tobool(data['button_AI']), Button_B0=tobool(data['button_B0']), Button_BI=tobool(data['button_BI'])\
+                    \n}\n\n\
+                .alter table SwitchDevice policy update\n\
+                    @'[{ \"IsEnabled\": true, \"Source\": \"IotUnparsedData\", \"Query\": \"parseSwitchDevice()\", \"IsTransactional\": false, \"PropagateIngestionProperties\": false}]'\n\n\
+                .create table MultySensorDevice(IotHubDeviceId: string, Timestamp: datetime, Location:string,Temperature:real,Humidity:real, MagnetContact:bool,  Illumination:int,Acceleration_X:real,Acceleration_Y:real,Acceleration_Z:real,AccelerationStatus:int)\n\n\
+                .create-or-alter  function parseMultySensorDevice(){\
+                    \nIotUnparsedData\
+                    \n| where isnotempty(data.['objectLastUpdated'])\
+                    \n| where data.['type'] == '0053'\
+                    \n| project IotHubDeviceId=tostring(data['iothub-connection-device-id']), Timestamp=todatetime(data['objectLastUpdated']), Location=tostring(data['location']), Temperature=toreal(data['temperature']), Humidity=toreal(data['humidity']),  MagnetContact=tobool(data['magnetContact']), Illumination=toint(data['illumination']), Acceleration_X=toreal(data['acceleration_X']),  Acceleration_Y=toreal(data['acceleration_Y']),  Acceleration_Z=toreal(data['acceleration_Z']), AccelerationStatus=toint(data['accelerationStatus'])\
+                    \n}\n\n\
+                .alter table MultySensorDevice policy update\n\
+                    @'[{ \"IsEnabled\": true, \"Source\": \"IotUnparsedData\", \"Query\": \"parseMultySensorDevice()\", \"IsTransactional\": false, \"PropagateIngestionProperties\": false}]'\n\n\
+                ")           
         poller = self._kusto_management_client.scripts.begin_create_or_update(resource_group_name =  self._resource_group_name, cluster_name = self._cluster_name, \
                         database_name = self._database_name, script_name= 'script1',
                         parameters = script)
@@ -165,8 +184,8 @@ class DataExplorer:
             "kind": "IotHub",
             "iotHubResourceId": iot_hub_resource_id,
             "consumer_group": "$Default",
-            "table_name" :  "iot_parsed",
-            "mappingRuleName": "iot_parsed_mapping",
+            "table_name" :  "IotUnparsedData",
+            "mappingRuleName": "iot_unparsed_mapping",
             "dataFormat": "JSON",
             "eventSystemProperties": [ "iothub-connection-device-id"],
             "sharedAccessPolicyName": "iothubowner",
@@ -226,7 +245,7 @@ def main():
     resource_group_name = args['resourceGroup']
 
     (iot_hub_id, iot_hub_pk) = createIotHub(credentials, subscription_id, resource_group_name, 
-                        args['iotLocation'], args['iotName'], args['iotSku'], args['iotCapacity'])
+                         args['iotLocation'], args['iotName'], args['iotSku'], args['iotCapacity'])
     
     #this file is going to be parsed by the aziotcia script 
     with open('iot_primary_key.txt', 'w') as f:

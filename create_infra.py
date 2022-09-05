@@ -170,6 +170,148 @@ class DataExplorer:
                     \n}\n\n\
                 .alter table MultySensorDevice policy update\n\
                     @'[{ \"IsEnabled\": true, \"Source\": \"IotUnparsedData\", \"Query\": \"parseMultySensorDevice()\", \"IsTransactional\": false, \"PropagateIngestionProperties\": false}]'\n\n\
+                .create-or-alter  function\
+                \nwith (folder='getDataMagneticDev')\
+                \ngetMagneticIds(){\
+                    \nMagneticContactDevice\
+                    \n| distinct IotHubDeviceId\
+                \n}\n\n\
+                .create-or-alter function\
+                \nwith (folder='getDataMagneticDev')\
+                \ngetMagneticLastValue(deviceId:string){\
+                    \n    MagneticContactDevice\
+                    \n    | where  IotHubDeviceId == deviceId\
+                    \n    | top 1 by Timestamp\
+                    \n    | project status = iff(Contact==true, \"Open\", \"Close\")\
+                \n}\n\n\
+                .create-or-alter  function\
+                \nwith (folder='getDataMagneticDev')\
+                \ngetMagneticData(deviceId:string, timepsan:string ){\
+                    \nlet myspan = case( ['timepsan'] == '5m', 5m, ['timepsan'] == '10m', 10m, ['timepsan'] == '30m', 30m, ['timepsan'] == '1h', 1h, ['timepsan'] == '1d', 1d, ['timepsan'] == '3d', 3d, 7d);\
+                    \nMagneticContactDevice\
+                    \n| where Timestamp  > ago(myspan)\
+                    \n| where IotHubDeviceId == deviceId\
+                    \n| order by  Timestamp desc\
+                \n}\n\n\
+                .create-or-alter  function\
+                \nwith (folder='getDataMagneticDev')\
+                \ngetMagneticStat(deviceId:string, timepsan:string){\
+                    \nlet myspan = case( ['timepsan'] == '5m', 5m, ['timepsan'] == '10m', 10m, ['timepsan'] == '30m', 30m, ['timepsan'] == '1h', 1h, ['timepsan'] == '1d', 1d, ['timepsan'] == '3d', 3d, 7d);\
+                    \nMagneticContactDevice\
+                    \n| where  IotHubDeviceId == deviceId\
+                    \n| extend Status=iff(Contact== \"true\", \"Open\", \"Close\")\
+                    \n| summarize  count() by Status\
+                \n}\n\n\
+                .create-or-alter  function\
+                \nwith (folder='getDataSwitchDev')\
+                \ngetSwitchIds(){\
+                    \nSwitchDevice\
+                    \n| distinct IotHubDeviceId\
+                \n}\n\n\
+                .create-or-alter function\
+                \nwith (folder='getDataSwitchDev')\
+                \ngetSwitchLastValue(deviceId:string){\
+                    \nSwitchDevice\
+                    \n| where  IotHubDeviceId == deviceId\
+                    \n| top 1 by Timestamp\
+                    \n| project Button_A0 = iff(Button_A0==true, \"Open\", \"Close\"), Button_AI = iff(Button_AI==true, \"Open\", \"Close\"), Button_B0 = iff(Button_B0==true, \"Open\", \"Close\"),  Button_BI = iff(Button_BI==true, \"Open\", \"Close\")\
+                \n}\n\n\
+                .create-or-alter  function\
+                \nwith (folder='getDataSwitchDev')\
+                \ngetSwitchData(deviceId:string, timepsan:string ){\
+                    \nlet myspan = case( ['timepsan'] == '5m', 5m, ['timepsan'] == '10m', 10m, ['timepsan'] == '30m', 30m, ['timepsan'] == '1h', 1h, ['timepsan'] == '1d', 1d, ['timepsan'] == '3d', 3d, 7d);\
+                    \nSwitchDevice\
+                    \n| where Timestamp  > ago(myspan)\
+                    \n| where IotHubDeviceId == deviceId\
+                    \n| order by  Timestamp desc\
+                \n}\n\n\
+                .create-or-alter  function\
+                \nwith (folder='getDataSwitchDev')\
+                \ngetSwitchStatA0(deviceId:string, timepsan:string){\
+                    \nlet myspan = case( ['timepsan'] == '5m', 5m, ['timepsan'] == '10m', 10m, ['timepsan'] == '30m', 30m, ['timepsan'] == '1h', 1h, ['timepsan'] == '1d', 1d, ['timepsan'] == '3d', 3d, 7d);\
+                    \nSwitchDevice\
+                    \n| where  IotHubDeviceId == deviceId\
+                    \n| where Timestamp  > ago(myspan)\
+                    \n| extend Button_A0=iff(Button_A0== \"true\", \"Open\", \"Close\"), Button_AI=iff(Button_AI== \"true\", \"Open\", \"Close\"),  Button_B0=iff(Button_B0== \"true\", \"Open\", \"Close\"),  Button_BI=iff(Button_BI== \"true\", \"Open\", \"Close\")\
+                    \n| summarize  count() by Button_A0\
+                \n}\n\n\
+                .create-or-alter  function\
+                \nwith (folder='getDataSwitchDev')\
+                \ngetSwitchStatAI(deviceId:string, timepsan:string){\
+                    \nlet myspan = case( ['timepsan'] == '5m', 5m, ['timepsan'] == '10m', 10m, ['timepsan'] == '30m', 30m, ['timepsan'] == '1h', 1h, ['timepsan'] == '1d', 1d, ['timepsan'] == '3d', 3d, 7d);\
+                    \nSwitchDevice\
+                    \n| where  IotHubDeviceId == deviceId\
+                    \n| where Timestamp  > ago(myspan)\
+                    \n| extend Button_A0=iff(Button_A0== \"true\", \"Open\", \"Close\"), Button_AI=iff(Button_AI== \"true\", \"Open\", \"Close\"),  Button_B0=iff(Button_B0== \"true\", \"Open\", \"Close\"),  Button_BI=iff(Button_BI== \"true\", \"Open\", \"Close\")\
+                    \n| summarize  count() by Button_AI\
+                \n}\n\n\
+                .create-or-alter  function\
+                \nwith (folder='getDataSwitchDev')\
+                \ngetSwitchStatB0(deviceId:string, timepsan:string){\
+                    \nlet myspan = case( ['timepsan'] == '5m', 5m, ['timepsan'] == '10m', 10m, ['timepsan'] == '30m', 30m, ['timepsan'] == '1h', 1h, ['timepsan'] == '1d', 1d, ['timepsan'] == '3d', 3d, 7d);\
+                    \nSwitchDevice\
+                    \n| where  IotHubDeviceId == deviceId\
+                    \n| where Timestamp  > ago(myspan)\
+                    \n| extend Button_A0=iff(Button_A0== \"true\", \"Open\", \"Close\"), Button_AI=iff(Button_AI== \"true\", \"Open\", \"Close\"),  Button_B0=iff(Button_B0== \"true\", \"Open\", \"Close\"),  Button_BI=iff(Button_BI== \"true\", \"Open\", \"Close\")\
+                    \n| summarize  count() by Button_B0\
+                \n}\n\n\
+                .create-or-alter  function\
+                \nwith (folder='getDataSwitchDev')\
+                \ngetSwitchStatBI(deviceId:string, timepsan:string){\
+                    \nlet myspan = case( ['timepsan'] == '5m', 5m, ['timepsan'] == '10m', 10m, ['timepsan'] == '30m', 30m, ['timepsan'] == '1h', 1h, ['timepsan'] == '1d', 1d, ['timepsan'] == '3d', 3d, 7d);\
+                    \nSwitchDevice\
+                    \n| where  IotHubDeviceId == deviceId\
+                    \n| where Timestamp  > ago(myspan)\
+                    \n| extend Button_A0=iff(Button_A0== \"true\", \"Open\", \"Close\"), Button_AI=iff(Button_AI== \"true\", \"Open\", \"Close\"),  Button_B0=iff(Button_B0== \"true\", \"Open\", \"Close\"),  Button_BI=iff(Button_BI== \"true\", \"Open\", \"Close\")\
+                    \n| summarize  count() by Button_BI\
+                \n}\n\n\
+                .create-or-alter  function\
+                \nwith (folder='getDataTempHumDev')\
+                \ngetTemphumIds(){\
+                    \nTempHumDevice\
+                    \n| distinct IotHubDeviceId\
+                \n}\n\n\
+                .create-or-alter function\
+                \nwith (folder='getDataTempHumDev')\
+                \ngetTemphumLastValue(deviceId:string){\
+                    \nTempHumDevice\
+                    \n| where  IotHubDeviceId == deviceId\
+                    \n| top 1 by Timestamp\
+                \n}\n\n\
+                .create-or-alter  function\
+                \nwith (folder='getDataTempHumDev')\
+                    \ngetTemphumData(deviceId:string, timepsan:string ){\
+                    \nlet myspan = case( ['timepsan'] == '5m', 5m, ['timepsan'] == '10m', 10m, ['timepsan'] == '30m', 30m, ['timepsan'] == '1h', 1h, ['timepsan'] == '1d', 1d, ['timepsan'] == '3d', 3d, 7d);\
+                    \nTempHumDevice\
+                    \n| where Timestamp  > ago(myspan)\
+                    \n| where IotHubDeviceId == deviceId\
+                    \n| order by  Timestamp desc\
+                \n}\n\n\
+                .create-or-alter  function\
+                \nwith (folder='getMultySensorDev')\
+                    \ngetMultysensorIds(){\
+                    \nMultySensorDevice\
+                    \n| distinct IotHubDeviceId\
+                \n}\n\n\
+                .create-or-alter function\
+                \nwith (folder='getMultySensorDev')\
+                \ngetMultysensorLastValue(deviceId:string){\
+                    \nMultySensorDevice\
+                    \n| where  IotHubDeviceId == deviceId\
+                    \n| top 1 by Timestamp\
+                    \n| extend Contact = iff(MagnetContact==true, \"Open\", \"Close\")\
+                    \n| extend Accelomter_Status = case(AccelerationStatus==0, \"Normal\", AccelerationStatus==1, \"Warning\", AccelerationStatus==2, \"Crash\", \"not parsed\"), AccelerationStatus\
+                \n}\n\n\
+                .create-or-alter  function\
+                \nwith (folder='getMultySensorDev')\
+                \ngetMultysensorData(deviceId:string, timepsan:string ){\
+                    \nlet myspan = case( ['timepsan'] == '5m', 5m, ['timepsan'] == '10m', 10m, ['timepsan'] == '30m', 30m, ['timepsan'] == '1h', 1h, ['timepsan'] == '1d', 1d, ['timepsan'] == '3d', 3d, 7d);\
+                    \nMultySensorDevice\
+                    \n| where Timestamp  > ago(myspan)\
+                    \n| where IotHubDeviceId == deviceId\
+                    \n| order by  Timestamp desc\
+                    \n| extend Contact = iff(MagnetContact==true, \"Open\", \"Close\")\
+                \n}\n\n\
                 ")           
         poller = self._kusto_management_client.scripts.begin_create_or_update(resource_group_name =  self._resource_group_name, cluster_name = self._cluster_name, \
                         database_name = self._database_name, script_name= 'script1',

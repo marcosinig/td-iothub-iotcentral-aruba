@@ -187,7 +187,7 @@ class DataExplorer:
                 .create-or-alter  function\
                 \nwith (folder='getDataMagneticDev')\
                 \ngetMagneticData(deviceId:string, timepsan:string ){\
-                    \nlet myspan = case( ['timepsan'] == '5m', 5m, ['timepsan'] == '10m', 10m, ['timepsan'] == '30m', 30m, ['timepsan'] == '1h', 1h, ['timepsan'] == '1d', 1d, ['timepsan'] == '3d', 3d, 7d);\
+                    \nlet myspan = case( ['timepsan'] == '5 minutes', 5m, ['timepsan'] == '10 minutes', 10m, ['timepsan'] == '30 minutes', 30m, ['timepsan'] == '1 hour', 1h, ['timepsan'] == '1 day', 1d, ['timepsan'] == '3 days', 3d, 7d);\
                     \nMagneticContactDevice\
                     \n| where Timestamp  > ago(myspan)\
                     \n| where IotHubDeviceId == deviceId\
@@ -196,7 +196,7 @@ class DataExplorer:
                 .create-or-alter  function\
                 \nwith (folder='getDataMagneticDev')\
                 \ngetMagneticStat(deviceId:string, timepsan:string){\
-                    \nlet myspan = case( ['timepsan'] == '5m', 5m, ['timepsan'] == '10m', 10m, ['timepsan'] == '30m', 30m, ['timepsan'] == '1h', 1h, ['timepsan'] == '1d', 1d, ['timepsan'] == '3d', 3d, 7d);\
+                    \nlet myspan = case( ['timepsan'] == '5 minutes', 5m, ['timepsan'] == '10 minutes', 10m, ['timepsan'] == '30 minutes', 30m, ['timepsan'] == '1 hour', 1h, ['timepsan'] == '1 day', 1d, ['timepsan'] == '3 days', 3d, 7d);\
                     \nMagneticContactDevice\
                     \n| where  IotHubDeviceId == deviceId\
                     \n| extend Status=iff(Contact== \"true\", \"Open\", \"Close\")\
@@ -219,7 +219,7 @@ class DataExplorer:
                 .create-or-alter  function\
                 \nwith (folder='getDataSwitchDev')\
                 \ngetSwitchData(deviceId:string, timepsan:string ){\
-                    \nlet myspan = case( ['timepsan'] == '5m', 5m, ['timepsan'] == '10m', 10m, ['timepsan'] == '30m', 30m, ['timepsan'] == '1h', 1h, ['timepsan'] == '1d', 1d, ['timepsan'] == '3d', 3d, 7d);\
+                    \nlet myspan = case( ['timepsan'] == '5 minutes', 5m, ['timepsan'] == '10 minutes', 10m, ['timepsan'] == '30 minutes', 30m, ['timepsan'] == '1 hour', 1h, ['timepsan'] == '1 day', 1d, ['timepsan'] == '3 days', 3d, 7d);\
                     \nSwitchDevice\
                     \n| where Timestamp  > ago(myspan)\
                     \n| where IotHubDeviceId == deviceId\
@@ -228,7 +228,7 @@ class DataExplorer:
                 .create-or-alter  function\
                 \nwith (folder='getDataSwitchDev')\
                 \ngetSwitchStatA0(deviceId:string, timepsan:string){\
-                    \nlet myspan = case( ['timepsan'] == '5m', 5m, ['timepsan'] == '10m', 10m, ['timepsan'] == '30m', 30m, ['timepsan'] == '1h', 1h, ['timepsan'] == '1d', 1d, ['timepsan'] == '3d', 3d, 7d);\
+                    \nlet myspan = case( ['timepsan'] == '5 minutes', 5m, ['timepsan'] == '10 minutes', 10m, ['timepsan'] == '30 minutes', 30m, ['timepsan'] == '1 hour', 1h, ['timepsan'] == '1 day', 1d, ['timepsan'] == '3 days', 3d, 7d);\
                     \nSwitchDevice\
                     \n| where  IotHubDeviceId == deviceId\
                     \n| where Timestamp  > ago(myspan)\
@@ -238,7 +238,7 @@ class DataExplorer:
                 .create-or-alter  function\
                 \nwith (folder='getDataSwitchDev')\
                 \ngetSwitchStatAI(deviceId:string, timepsan:string){\
-                    \nlet myspan = case( ['timepsan'] == '5m', 5m, ['timepsan'] == '10m', 10m, ['timepsan'] == '30m', 30m, ['timepsan'] == '1h', 1h, ['timepsan'] == '1d', 1d, ['timepsan'] == '3d', 3d, 7d);\
+                    \nlet myspan = case( ['timepsan'] == '5 minutes', 5m, ['timepsan'] == '10 minutes', 10m, ['timepsan'] == '30 minutes', 30m, ['timepsan'] == '1 hour', 1h, ['timepsan'] == '1 day', 1d, ['timepsan'] == '3 days', 3d, 7d);\
                     \nSwitchDevice\
                     \n| where  IotHubDeviceId == deviceId\
                     \n| where Timestamp  > ago(myspan)\
@@ -248,7 +248,7 @@ class DataExplorer:
                 .create-or-alter  function\
                 \nwith (folder='getDataSwitchDev')\
                 \ngetSwitchStatB0(deviceId:string, timepsan:string){\
-                    \nlet myspan = case( ['timepsan'] == '5m', 5m, ['timepsan'] == '10m', 10m, ['timepsan'] == '30m', 30m, ['timepsan'] == '1h', 1h, ['timepsan'] == '1d', 1d, ['timepsan'] == '3d', 3d, 7d);\
+                    \nlet myspan = case( ['timepsan'] == '5 minutes', 5m, ['timepsan'] == '10 minutes', 10m, ['timepsan'] == '30 minutes', 30m, ['timepsan'] == '1 hour', 1h, ['timepsan'] == '1 day', 1d, ['timepsan'] == '3 days', 3d, 7d);\
                     \nSwitchDevice\
                     \n| where  IotHubDeviceId == deviceId\
                     \n| where Timestamp  > ago(myspan)\
@@ -258,7 +258,7 @@ class DataExplorer:
                 .create-or-alter  function\
                 \nwith (folder='getDataSwitchDev')\
                 \ngetSwitchStatBI(deviceId:string, timepsan:string){\
-                    \nlet myspan = case( ['timepsan'] == '5m', 5m, ['timepsan'] == '10m', 10m, ['timepsan'] == '30m', 30m, ['timepsan'] == '1h', 1h, ['timepsan'] == '1d', 1d, ['timepsan'] == '3d', 3d, 7d);\
+                    \nlet myspan = case( ['timepsan'] == '5 minutes', 5m, ['timepsan'] == '10 minutes', 10m, ['timepsan'] == '30 minutes', 30m, ['timepsan'] == '1 hour', 1h, ['timepsan'] == '1 day', 1d, ['timepsan'] == '3 days', 3d, 7d);\
                     \nSwitchDevice\
                     \n| where  IotHubDeviceId == deviceId\
                     \n| where Timestamp  > ago(myspan)\
@@ -281,7 +281,7 @@ class DataExplorer:
                 .create-or-alter  function\
                 \nwith (folder='getDataTempHumDev')\
                     \ngetTemphumData(deviceId:string, timepsan:string ){\
-                    \nlet myspan = case( ['timepsan'] == '5m', 5m, ['timepsan'] == '10m', 10m, ['timepsan'] == '30m', 30m, ['timepsan'] == '1h', 1h, ['timepsan'] == '1d', 1d, ['timepsan'] == '3d', 3d, 7d);\
+                    \nlet myspan = case( ['timepsan'] == '5 minutes', 5m, ['timepsan'] == '10 minutes', 10m, ['timepsan'] == '30 minutes', 30m, ['timepsan'] == '1 hour', 1h, ['timepsan'] == '1 day', 1d, ['timepsan'] == '3 days', 3d, 7d);\
                     \nTempHumDevice\
                     \n| where Timestamp  > ago(myspan)\
                     \n| where IotHubDeviceId == deviceId\
@@ -305,7 +305,7 @@ class DataExplorer:
                 .create-or-alter  function\
                 \nwith (folder='getMultySensorDev')\
                 \ngetMultysensorData(deviceId:string, timepsan:string ){\
-                    \nlet myspan = case( ['timepsan'] == '5m', 5m, ['timepsan'] == '10m', 10m, ['timepsan'] == '30m', 30m, ['timepsan'] == '1h', 1h, ['timepsan'] == '1d', 1d, ['timepsan'] == '3d', 3d, 7d);\
+                    \nlet myspan = case( ['timepsan'] == '5 minutes', 5m, ['timepsan'] == '10 minutes', 10m, ['timepsan'] == '30 minutes', 30m, ['timepsan'] == '1 hour', 1h, ['timepsan'] == '1 day', 1d, ['timepsan'] == '3 days', 3d, 7d);\
                     \nMultySensorDevice\
                     \n| where Timestamp  > ago(myspan)\
                     \n| where IotHubDeviceId == deviceId\

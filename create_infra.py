@@ -78,7 +78,29 @@ class DataExplorer:
                                 },
                 'uksouth' : {  self.SkuType.no_sla_standard :  self.SkuType("Dev(No SLA)_Standard_E2a_v4", "Basic", 1),
                                    self.SkuType.standard_8 : self.SkuType("Standard_L8s_v3", "Standard", 2)
+                                },
+                 'eastus' : {  self.SkuType.no_sla_standard :  self.SkuType("Dev(No SLA)_Standard_E2a_v4", "Basic", 1),
+                                   self.SkuType.standard_8 : self.SkuType("Standard_L8as_v3", "Standard", 2)
+                                },
+                'eastus2' : {  self.SkuType.no_sla_standard :  self.SkuType("Dev(No SLA)_Standard_E2a_v4", "Basic", 1),
+                                   self.SkuType.standard_8 : self.SkuType("Standard_L8as_v3", "Standard", 2)
+                                },
+                'japaneast' : {  self.SkuType.no_sla_standard :  self.SkuType("Dev(No SLA)_Standard_E2a_v4", "Basic", 1),
+                                   self.SkuType.standard_8 : self.SkuType("Standard_L8s_v3", "Standard", 2)
+                                },
+                'northeurope' : {  self.SkuType.no_sla_standard :  self.SkuType("Dev(No SLA)_Standard_E2a_v4", "Basic", 1),
+                                   self.SkuType.standard_8 : self.SkuType("Standard_L8s_v3", "Standard", 2)
+                                },
+                'southeastasia' : {  self.SkuType.no_sla_standard :  self.SkuType("Dev(No SLA)_Standard_D11_v2", "Basic", 1),
+                                   self.SkuType.standard_8 : self.SkuType("Standard_L8s_v3", "Standard", 2)
+                                },
+                'westeurope' : {  self.SkuType.no_sla_standard :  self.SkuType("Dev(No SLA)_Standard_E2a_v4", "Basic", 1),
+                                   self.SkuType.standard_8 : self.SkuType("Standard_L8as_v3", "Standard", 2)
+                                },
+                 'westus' : {  self.SkuType.no_sla_standard :  self.SkuType("Dev(No SLA)_Standard_E2a_v4", "Basic", 1),
+                                   self.SkuType.standard_8 : self.SkuType("Standard_L8s_v3", "Standard", 2)
                                 }
+                
             }
 
         
@@ -311,6 +333,27 @@ class DataExplorer:
                     \n| where IotHubDeviceId == deviceId\
                     \n| order by  Timestamp desc\
                     \n| extend Contact = iff(MagnetContact==true, \"Open\", \"Close\")\
+                \n}\n\n\
+                .create-or-alter  function\
+                \nwith (folder='getAllDevices')\
+                \ngetDeviceList(){\
+                    \nlet a = TempHumDevice | summarize any( Location) by IotHubDeviceId;\
+                    \nlet b = MagneticContactDevice | summarize any( Location) by IotHubDeviceId;\
+                    \nlet c = SwitchDevice | summarize any( Location) by IotHubDeviceId;\
+                    \nlet d = MultySensorDevice | summarize any( Location) by IotHubDeviceId;\
+                    \nunion a,b,c,d\
+                    \n| project IotHubDeviceId, location = any_Location\
+                \n}\n\n\
+                .create-or-alter  function\
+                \nwith (folder='getAllDevices')\
+                \ngetDeviceOnline(){\
+                    \nlet a = TempHumDevice | summarize max(Timestamp) by IotHubDeviceId;\
+                    \nlet b = MagneticContactDevice | summarize max(Timestamp) by IotHubDeviceId;\
+                    \nlet c = SwitchDevice | summarize max(Timestamp) by IotHubDeviceId;\
+                    \nlet d = MultySensorDevice | summarize max(Timestamp) by IotHubDeviceId;\
+                    \nunion a,b,c,d\
+                    \n| project  IotHubDeviceId, Last_Device_payload = max_Timestamp\
+                    \n| extend Device_Status = iff(now() - Last_Device_payload > 12h, \"Offiline\", \"Online\")\
                 \n}\n\n\
                 ")           
         poller = self._kusto_management_client.scripts.begin_create_or_update(resource_group_name =  self._resource_group_name, cluster_name = self._cluster_name, \

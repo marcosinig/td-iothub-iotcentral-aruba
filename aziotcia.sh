@@ -92,8 +92,9 @@ echo "Starting Docker"
 systemctl start docker
 systemctl enable docker
 
-docker login --username $DOCKER_HUB_USERNAME --password $DOCKER_HUB_PASSWORD
-
+#docker login --username $DOCKER_HUB_USERNAME --password $DOCKER_HUB_PASSWORD
+if [ $IS_IOTHUB_DEPLOY_STR == "true" ];then
+echo "Deploy iot Hub Docker"
 cat > ~/docker-compose.yml <<EOF
 version: '3.8'
 volumes:
@@ -129,10 +130,14 @@ services:
     ports:
       - 8082:8080
 EOF
+else
+  echo "Deploy iot Central Docker"
+
+fi
 
 rm -rf ~/mobius-cloud-install
 
 echo "Starting mobiusflow"
-cd ~ && docker-compose up &
+#cd ~ && docker-compose up &
 
 

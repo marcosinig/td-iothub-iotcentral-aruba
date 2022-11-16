@@ -135,7 +135,44 @@ services:
 EOF
 else
   echo "Deploy iot Central Docker"
-
+cat > ~/docker-compose.yml <<EOF
+version: '3.8'
+volumes:
+  mobius-data:
+services:
+  mobius:
+    image: ghcr.io/mobiusflow/mobiusflow-le-tdc2r:1.10.0-tdc2r-rc.16_1.10.0
+    container_name: mobiusflow
+    privileged: false
+    restart: always
+    environment:
+      - IS_IOTHUB_DEPLOY=$IS_IOTHUB_DEPLOY_STR
+      - IOTHUB_CONNECTIONSTRING=$IOT_HUB_CONNECTION_STRING
+      - IOT_APP_NAME=$IOT_CENTRAL_NAME
+      - IOT_OPERATOR_TOKEN=$IOT_OPERATOR_TOKEN
+      - MOBIUS_LICENCE=$MOBIUS_LICENSE    
+      - MOBIUS_ENGINE_API_PORT=9081
+      - MOBIUS_ENGINE_API_AUTH_PROVIDER=local
+      - MOBIUS_HUB_RESET_PSKS=true
+      - MOBIUS_ENABLE_CONFIG_UI=true
+      - MOBIUS_HUB_ID=000001
+      - MOBIUS_LOCAL_TIMEOUT=10000
+    ports:
+      - 8080:8080
+      - 9082:9081
+      - 1883:1883
+      -	30817:30817
+    volumes:
+      - mobius-data:/data
+    
+  tdc2rsetup:
+    container_name: tdc2rsetup
+    image: ghcr.io/mobiusflow/tdc2r-setup:1.0.0-rc.2
+    privileged: false
+    restart: always
+    ports:
+      - 8082:8080
+EOF
 fi
 
 rm -rf ~/mobius-cloud-install

@@ -101,7 +101,7 @@ volumes:
   mobius-data:
 services:
   mobius:
-    image: mobiusflow/mobiusflow-tdc2r:latest 
+    image: ghcr.io/mobiusflow/mobiusflow-le-tdc2r:1.10.0-tdc2r-rc.16_1.10.0
     container_name: mobiusflow
     privileged: false
     restart: always
@@ -111,6 +111,8 @@ services:
       - IOT_APP_NAME=$IOT_CENTRAL_NAME
       - IOT_OPERATOR_TOKEN=$IOT_OPERATOR_TOKEN
       - MOBIUS_LICENCE=$MOBIUS_LICENSE    
+      - MOBIUS_ENGINE_API_PORT=9081
+      - MOBIUS_ENGINE_API_AUTH_PROVIDER=local
       - MOBIUS_HUB_RESET_PSKS=true
       - MOBIUS_ENABLE_CONFIG_UI=true
       - MOBIUS_HUB_ID=000001
@@ -119,12 +121,13 @@ services:
       - 8080:8080
       - 9082:9081
       - 1883:1883
+      -	30817:30817
     volumes:
       - mobius-data:/data
     
   tdc2rsetup:
     container_name: tdc2rsetup
-    image: mobiusflow/td-c2r-quick-setup:latest 
+    image: ghcr.io/mobiusflow/tdc2r-setup:1.0.0-rc.2
     privileged: false
     restart: always
     ports:

@@ -141,6 +141,6 @@ fi
 rm -rf ~/mobius-cloud-install
 
 echo "Starting mobiusflow"
-#cd ~ && docker-compose up &
+cd ~ && docker-compose up &
 
 

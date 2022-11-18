@@ -48,6 +48,7 @@ add-apt-repository universe > /dev/null
 apt update
 sudo apt-get -y install jq
 curl -sL https://aka.ms/InstallAzureCLIDeb | sudo bash
+az extension add --name azure-iot
 az login --service-principal -u $AZURE_CLIENT_ID -p $AZURE_CLIENT_SECRET --tenant $AZURE_TENANT_ID
 
 if [ $IS_IOTHUB_DEPLOY_STR == "true" ];then
@@ -62,9 +63,9 @@ if [ $IS_IOTHUB_DEPLOY_STR == "true" ];then
   IOT_HUB_PRIMARY_KEY=$(<iot_primary_key.txt)
   IOT_HUB_CONNECTION_STRING=$(printf "HostName=%s;SharedAccessKeyName=iothubowner;SharedAccessKey=%s" "$IOT_HUB_HOST_NAME" "$IOT_HUB_PRIMARY_KEY")
   IOT_HUB_HOST_NAME_FULL=$(printf "%s.azure-devices.net" "$IOT_HUB_HOST_NAME")
+  echo "Deploy DPS"
   DPS_RAND_SUFFIX='' #an contain only alphanumeric
   DPS_NAME=$(printf "DPS%s%s" "$IOT_HUB_HOST_NAME" "$DPS_RAND_SUFFIX")
-  echo "Deploy DPS"
   DPS_CREATE_ANS=$(az iot dps create --name $DPS_NAME --resource-group $RESOURCE_GROUP_NAME)
   DPS_IDSCOPE=$(echo $DPS_CREATE_ANS | $jq '.properties.idScope' |  sed 's/^"\(.*\)".*/\1/')
   DPS_GLOBAL_ENDPOINT=$(echo $DPS_CREATE_ANS | $jq '.properties.deviceProvisioningHostName' |  sed 's/^"\(.*\)".*/\1/')
@@ -76,7 +77,6 @@ if [ $IS_IOTHUB_DEPLOY_STR == "true" ];then
   echo "End iot Hub"
 else
   echo "Deploy iot Central"
-  az extension add --name azure-iot
   curl -sL https://aka.ms/InstallAzureCLIDeb | sudo bash
   az iot central app create -n $IOT_CENTRAL_NAME -g $RESOURCE_GROUP_NAME -s $IOT_CENTRAL_SUBDOMAIN -l $IOT_CENTRAL_LOCATION -p $IOT_CENTRAL_SKU -t $IOT_CENTRAL_TEMPLATE
   APP_ID=$(az iot central app list -g $RESOURCE_GROUP_NAME | grep application | awk '{print $2}'| sed 's/^"\(.*\)".*/\1/')

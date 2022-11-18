@@ -159,7 +159,7 @@ class DataExplorer:
                 .create table TempHumDevice(IotHubDeviceId: string, Timestamp: datetime, Location:string, Temperature:real,Humidity:real)\n\n\
                 .create-or-alter  function parseTempHumDevice(){\
                     \nIotUnparsedData\
-                    \n| where data.['type'] == '0034'\
+                    \n| where data.['type'] == '0031'\
                     \n| where isnotempty(data.['objectLastUpdated'])\
                     \n| project IotHubDeviceId=tostring(data['iothub-connection-device-id']), Timestamp=todatetime(data['objectLastUpdated']), Location=tostring(data['location']), Temperature=toreal(data['temperature']), Humidity=toreal(data['humidity'])\
                     \n}\n\n\

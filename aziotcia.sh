@@ -47,10 +47,10 @@ apt-get install -y software-properties-common > /dev/null
 add-apt-repository universe > /dev/null
 apt update
 sudo apt-get -y install jq
-
+az login --service-principal -u $AZURE_CLIENT_ID -p $AZURE_CLIENT_SECRET --tenant $AZURE_TENANT_ID
+az extension add --name azure-iot
 if [ $IS_IOTHUB_DEPLOY_STR == "true" ];then
   echo "Deploy iot Hub"
- 
   sudo apt install python3-pip -y
   pip3 install azure-common azure-mgmt-kusto azure.identity azure-mgmt-iothub 
   wget https://raw.githubusercontent.com/marcosinig/td-iothub-iotcentral-aruba/master/create_infra.py
@@ -60,11 +60,21 @@ if [ $IS_IOTHUB_DEPLOY_STR == "true" ];then
                 -desoft $DE_SOFT_DELETE_PERIOD -deisen $DE_IS_ENABLED -iotloc $IOT_HUB_LOCATION -des $DE_SKU
   IOT_HUB_PRIMARY_KEY=$(<iot_primary_key.txt)
   IOT_HUB_CONNECTION_STRING=$(printf "HostName=%s;SharedAccessKeyName=iothubowner;SharedAccessKey=%s" "$IOT_HUB_HOST_NAME" "$IOT_HUB_PRIMARY_KEY")
+  IOT_HUB_HOST_NAME_FULL=$(printf "%s.azure-devices.net" "$IOT_HUB_HOST_NAME")
+  DPS_RAND_SUFFIX=$(cat /dev/urandom | tr -dc '[:alpha:]' | fold -w ${1:-6} | head -n 1) 
+  DPS_NAME=$(printf "DPS_%s_%s" "$IOT_HUB_HOST_NAME" "$DPS_RAND_SUFFIX")
+  DPS_CREATE_ANS=$(az iot dps create --name $DPS_NAME --resource-group $RESOURCE_GROUP_NAME)
+  DPS_IDSCOPE=$(echo $DPS_CREATE_ANS | $jq '.properties.idScope' |  sed 's/^"\(.*\)".*/\1/')
+  DPS_GLOBAL_ENDPOINT=$(echo $DPS_CREATE_ANS | $jq '.properties.deviceProvisioningHostName' |  sed 's/^"\(.*\)".*/\1/')
+  
+  az iot dps linked-hub create --dps-name $DPS_NAME --resource-group $RESOURCE_GROUP_NAME --connection-string $IOT_HUB_CONNECTION_STRIN
+  DPS_ENROLMENT_PRIMARY_KEY=$(cat /dev/urandom | tr -dc '[:alpha:]' | fold -w ${1:-88} | head -n 1)
+  DPS_ENROLMENT_SECONDARY_KEY=$(cat /dev/urandom | tr -dc '[:alpha:]' | fold -w ${1:-88} | head -n 1)
+  az iot dps enrollment-group create -g $RESOURCE_GROUP_NAME --dps-name  $DPS_NAME --enrollment-id $DPS_ENROLMENTID --primary-key $DPS_ENROLMENT_PRIMARY_KEY  --secondary-key $DPS_ENROLMENT_SECONDARY_KEY
+
 else
   echo "Deploy iot Central"
   curl -sL https://aka.ms/InstallAzureCLIDeb | sudo bash
-  az extension add --name azure-iot
-  az login --service-principal -u $AZURE_CLIENT_ID -p $AZURE_CLIENT_SECRET --tenant $AZURE_TENANT_ID
   az iot central app create -n $IOT_CENTRAL_NAME -g $RESOURCE_GROUP_NAME -s $IOT_CENTRAL_SUBDOMAIN -l $IOT_CENTRAL_LOCATION -p $IOT_CENTRAL_SKU -t $IOT_CENTRAL_TEMPLATE
   APP_ID=$(az iot central app list -g $RESOURCE_GROUP_NAME | grep application | awk '{print $2}'| sed 's/^"\(.*\)".*/\1/')
   az iot central user create --user-id $USER_OBJECT_ID --app-id $APP_ID --email $USER_EMAIL --role admin
@@ -101,7 +111,7 @@ volumes:
   mobius-data:
 services:
   mobius:
-    image: ghcr.io/mobiusflow/mobiusflow-le-tdc2r:1.10.0-tdc2r-rc.16_1.10.0
+    image: ghcr.io/mobiusflow/mobiusflow-le-tdc2r-aruba-hub:1.10.6-tdc2r-hub-rc.1_1.10.6
     container_name: mobiusflow
     privileged: false
     restart: always
@@ -117,6 +127,12 @@ services:
       - MOBIUS_ENABLE_CONFIG_UI=true
       - MOBIUS_HUB_ID=000001
       - MOBIUS_LOCAL_TIMEOUT=10000
+      - IOT_HUB_HOSTNAME=$IOT_HUB_HOST_NAME_FULL
+      - IOT_HUB_PRIMARY_KEY=$IOT_HUB_PRIMARY_KEY
+      - DPS_GLOBAL_ENDPOINT=$DPS_GLOBAL_ENDPOINT
+      - DPS_ENROLMENT_PRIMARY_KEY=$DPS_ENROLMENT_PRIMARY_KEY
+      - DPS_IDSCOPE=$DPS_IDSCOPE
+
     ports:
       - 8080:8080
       - 9082:9081
@@ -177,7 +193,8 @@ fi
 
 rm -rf ~/mobius-cloud-install
 
-echo "Starting mobiusflow"
-cd ~ && docker-compose up &
+echo "DISABLE MOBIOUSFLOW START REMOVE ME"
+#echo "Starting mobiusflow"
+#cd ~ && docker-compose up &
 
 

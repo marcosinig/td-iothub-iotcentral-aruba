@@ -47,8 +47,9 @@ apt-get install -y software-properties-common > /dev/null
 add-apt-repository universe > /dev/null
 apt update
 sudo apt-get -y install jq
+curl -sL https://aka.ms/InstallAzureCLIDeb | sudo bash
 az login --service-principal -u $AZURE_CLIENT_ID -p $AZURE_CLIENT_SECRET --tenant $AZURE_TENANT_ID
-az extension add --name azure-iot
+
 if [ $IS_IOTHUB_DEPLOY_STR == "true" ];then
   echo "Deploy iot Hub"
   sudo apt install python3-pip -y
@@ -74,6 +75,7 @@ if [ $IS_IOTHUB_DEPLOY_STR == "true" ];then
 
 else
   echo "Deploy iot Central"
+  az extension add --name azure-iot
   curl -sL https://aka.ms/InstallAzureCLIDeb | sudo bash
   az iot central app create -n $IOT_CENTRAL_NAME -g $RESOURCE_GROUP_NAME -s $IOT_CENTRAL_SUBDOMAIN -l $IOT_CENTRAL_LOCATION -p $IOT_CENTRAL_SKU -t $IOT_CENTRAL_TEMPLATE
   APP_ID=$(az iot central app list -g $RESOURCE_GROUP_NAME | grep application | awk '{print $2}'| sed 's/^"\(.*\)".*/\1/')

@@ -74,7 +74,7 @@ if [ $IS_IOTHUB_DEPLOY_STR == "true" ];then
   az iot dps linked-hub create --dps-name $DPS_NAME --resource-group $RESOURCE_GROUP_NAME --connection-string $IOT_HUB_CONNECTION_STRING
   DPS_ENROLMENT_PRIMARY_KEY=$(dd if=/dev/urandom bs=56 count=1 status=none | base64)
   DPS_ENROLMENT_SECONDARY_KEY=$(dd if=/dev/urandom bs=56 count=1 status=none | base64)
-  az iot dps enrollment-group create -g $RESOURCE_GROUP_NAME --dps-name  $DPS_NAME --enrollment-id 'arubaenrollmentid' --primary-key $DPS_ENROLMENT_PRIMARY_KEY  --secondary-key $DPS_ENROLMENT_SECONDARY_KEY --iot-hubs IOT_HUB_HOST_NAME_FULL  --allocation-policy hashed
+  az iot dps enrollment-group create -g $RESOURCE_GROUP_NAME --dps-name  $DPS_NAME --enrollment-id 'arubaenrollmentid' --primary-key $DPS_ENROLMENT_PRIMARY_KEY  --secondary-key $DPS_ENROLMENT_SECONDARY_KEY --iot-hubs $IOT_HUB_HOST_NAME_FULL  --allocation-policy hashed
   echo "End iot Hub"
 else
   echo "Deploy iot Central"

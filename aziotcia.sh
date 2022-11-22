@@ -62,18 +62,21 @@ if [ $IS_IOTHUB_DEPLOY_STR == "true" ];then
                 -desoft $DE_SOFT_DELETE_PERIOD -deisen $DE_IS_ENABLED -iotloc $IOT_HUB_LOCATION -des $DE_SKU
   IOT_HUB_PRIMARY_KEY=$(<iot_primary_key.txt)
   IOT_HUB_PRIMARY_KEY_REG_RW=$(<iot_primary_key_registryReadWrite.txt)
-  IOT_HUB_CONNECTION_STRING=$(printf "HostName=%s;SharedAccessKeyName=iothubowner;SharedAccessKey=%s" "$IOT_HUB_HOST_NAME" "$IOT_HUB_PRIMARY_KEY")
   IOT_HUB_HOST_NAME_FULL=$(printf "%s.azure-devices.net" "$IOT_HUB_HOST_NAME")
-   echo "Deploy DPS"
+  IOT_HUB_CONNECTION_STRING=$(printf "HostName=%s;SharedAccessKeyName=iothubowner;SharedAccessKey=%s" "$IOT_HUB_HOST_NAME_FULL" "$IOT_HUB_PRIMARY_KEY")
+  echo "IOT_HUB_CONNECTION_STRING  $IOT_HUB_CONNECTION_STRING"
+
+  echo "Deploy DPS"
   DPS_RAND_SUFFIX='' #an contain only alphanumeric
   DPS_NAME=$(printf "DPS%s%s" "$IOT_HUB_HOST_NAME" "$DPS_RAND_SUFFIX")
   DPS_CREATE_ANS=$(az iot dps create --name $DPS_NAME --resource-group $RESOURCE_GROUP_NAME)
   DPS_IDSCOPE=$(echo $DPS_CREATE_ANS | jq '.properties.idScope' |  sed 's/^"\(.*\)".*/\1/')
   DPS_GLOBAL_ENDPOINT=$(echo $DPS_CREATE_ANS | jq '.properties.deviceProvisioningHostName' |  sed 's/^"\(.*\)".*/\1/')
-  
+  echo "Deploy linked-hub"
   az iot dps linked-hub create --dps-name $DPS_NAME --resource-group $RESOURCE_GROUP_NAME --connection-string $IOT_HUB_CONNECTION_STRING
   DPS_ENROLMENT_PRIMARY_KEY=$(dd if=/dev/urandom bs=56 count=1 status=none | base64)
   DPS_ENROLMENT_SECONDARY_KEY=$(dd if=/dev/urandom bs=56 count=1 status=none | base64)
+  echo "Deploy  enrollment-group"
   az iot dps enrollment-group create -g $RESOURCE_GROUP_NAME --dps-name  $DPS_NAME --enrollment-id 'arubaenrollmentid' --primary-key $DPS_ENROLMENT_PRIMARY_KEY  --secondary-key $DPS_ENROLMENT_SECONDARY_KEY --iot-hubs $IOT_HUB_HOST_NAME_FULL  --allocation-policy hashed
   echo "End iot Hub"
 else

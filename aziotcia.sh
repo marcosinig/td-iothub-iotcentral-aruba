@@ -61,6 +61,7 @@ if [ $IS_IOTHUB_DEPLOY_STR == "true" ];then
                 -p $USER_OBJECT_ID -e $USER_EMAIL -iotname $IOT_HUB_HOST_NAME  -iotsku $IOT_HUB_SKU -iotcap $IOT_CAPACITY \
                 -desoft $DE_SOFT_DELETE_PERIOD -deisen $DE_IS_ENABLED -iotloc $IOT_HUB_LOCATION -des $DE_SKU
   IOT_HUB_PRIMARY_KEY=$(<iot_primary_key.txt)
+  IOT_HUB_PRIMARY_KEY_REG_RW=$(<iot_primary_key_registryReadWrite.txt)
   IOT_HUB_CONNECTION_STRING=$(printf "HostName=%s;SharedAccessKeyName=iothubowner;SharedAccessKey=%s" "$IOT_HUB_HOST_NAME" "$IOT_HUB_PRIMARY_KEY")
   IOT_HUB_HOST_NAME_FULL=$(printf "%s.azure-devices.net" "$IOT_HUB_HOST_NAME")
    echo "Deploy DPS"
@@ -131,7 +132,7 @@ services:
       - MOBIUS_HUB_ID=000001
       - MOBIUS_LOCAL_TIMEOUT=10000
       - IOT_HUB_HOSTNAME=$IOT_HUB_HOST_NAME_FULL
-      - IOT_HUB_PRIMARY_KEY=$IOT_HUB_PRIMARY_KEY
+      - IOT_HUB_PRIMARY_KEY=$IOT_HUB_PRIMARY_KEY_REG_RW
       - DPS_GLOBAL_ENDPOINT=$DPS_GLOBAL_ENDPOINT
       - DPS_ENROLMENT_PRIMARY_KEY=$DPS_ENROLMENT_PRIMARY_KEY
       - DPS_IDSCOPE=$DPS_IDSCOPE

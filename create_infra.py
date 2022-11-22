@@ -54,7 +54,8 @@ def createIotHub(credentials, subscription_id, resource_group_name, location, io
     ).result()
     logger.info("cCreate iot hub resource:\n{}".format(iot_hub_resource))
     shared_access_signature= iothub_client.iot_hub_resource.get_keys_for_key_name(resource_group_name, iot_hub_name, 'iothubowner')
-    return (iot_hub_resource.id,shared_access_signature.primary_key)
+    registryReadWrite= iothub_client.iot_hub_resource.get_keys_for_key_name(resource_group_name, iot_hub_name, 'registryReadWrite')
+    return (iot_hub_resource.id,shared_access_signature.primary_key, registryReadWrite.primary_key)
 
 class DataExplorer:
     class SkuTypes:
@@ -429,12 +430,15 @@ def main():
     )
     resource_group_name = args['resourceGroup']
 
-    (iot_hub_id, iot_hub_pk) = createIotHub(credentials, subscription_id, resource_group_name, 
+    (iot_hub_id, iot_hub_pk, iot_hub_pk_registryReadWrite) = createIotHub(credentials, subscription_id, resource_group_name, 
                          args['iotLocation'], args['iotName'], args['iotSku'], args['iotCapacity'])
     
     #this file is going to be parsed by the aziotcia script 
     with open('iot_primary_key.txt', 'w') as f:
         print(iot_hub_pk, file=f)
+    
+    with open('iot_primary_key_registryReadWrite.txt', 'w') as f:
+        print(iot_hub_pk_registryReadWrite, file=f)
 
         
     if (args['deIsEnabled'].lower() == 'true'):

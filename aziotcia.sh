@@ -200,8 +200,7 @@ fi
 
 rm -rf ~/mobius-cloud-install
 
-echo "DISABLE MOBIOUSFLOW START REMOVE ME"
-#echo "Starting mobiusflow"
-#cd ~ && docker-compose up &
+echo "Starting mobiusflow"
+cd ~ && docker-compose up &
 
 

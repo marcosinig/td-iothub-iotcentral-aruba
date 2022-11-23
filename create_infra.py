@@ -197,31 +197,31 @@ class DataExplorer:
                 \nwith (folder='getDataMagneticDev')\
                 \ngetMagneticIds(){\
                     \nMagneticContactDevice\
-                    \n| distinct IotHubDeviceId\
+                    \n| distinct IotHubDeviceId, Name\
                 \n}\n\n\
                 .create-or-alter function\
                 \nwith (folder='getDataMagneticDev')\
-                \ngetMagneticLastValue(deviceId:string){\
+                \ngetMagneticLastValue(name:string){\
                     \n    MagneticContactDevice\
-                    \n    | where  IotHubDeviceId == deviceId\
+                    \n    | where  Name == name\
                     \n    | top 1 by Timestamp\
                     \n    | project status = iff(Contact==true, \"Open\", \"Close\")\
                 \n}\n\n\
                 .create-or-alter  function\
                 \nwith (folder='getDataMagneticDev')\
-                \ngetMagneticData(deviceId:string, timepsan:string ){\
+                \ngetMagneticData(name:string, timepsan:string ){\
                     \nlet myspan = case( ['timepsan'] == '5 minutes', 5m, ['timepsan'] == '10 minutes', 10m, ['timepsan'] == '30 minutes', 30m, ['timepsan'] == '1 hour', 1h, ['timepsan'] == '1 day', 1d, ['timepsan'] == '3 days', 3d, 7d);\
                     \nMagneticContactDevice\
                     \n| where Timestamp  > ago(myspan)\
-                    \n| where IotHubDeviceId == deviceId\
+                    \n| where Name == name\
                     \n| order by  Timestamp desc\
                 \n}\n\n\
                 .create-or-alter  function\
                 \nwith (folder='getDataMagneticDev')\
-                \ngetMagneticStat(deviceId:string, timepsan:string){\
+                \ngetMagneticStat(name:string, timepsan:string){\
                     \nlet myspan = case( ['timepsan'] == '5 minutes', 5m, ['timepsan'] == '10 minutes', 10m, ['timepsan'] == '30 minutes', 30m, ['timepsan'] == '1 hour', 1h, ['timepsan'] == '1 day', 1d, ['timepsan'] == '3 days', 3d, 7d);\
                     \nMagneticContactDevice\
-                    \n| where  IotHubDeviceId == deviceId\
+                    \n| where  Name == name\
                     \n| extend Status=iff(Contact== \"true\", \"Open\", \"Close\")\
                     \n| summarize  count() by Status\
                 \n}\n\n\
@@ -229,61 +229,61 @@ class DataExplorer:
                 \nwith (folder='getDataSwitchDev')\
                 \ngetSwitchIds(){\
                     \nSwitchDevice\
-                    \n| distinct IotHubDeviceId\
+                    \n| distinct IotHubDeviceId, Name\
                 \n}\n\n\
                 .create-or-alter function\
                 \nwith (folder='getDataSwitchDev')\
-                \ngetSwitchLastValue(deviceId:string){\
+                \ngetSwitchLastValue(name:string){\
                     \nSwitchDevice\
-                    \n| where  IotHubDeviceId == deviceId\
+                    \n| where  Name == name\
                     \n| top 1 by Timestamp\
                     \n| project Button_A0 = iff(Button_A0==true, \"Open\", \"Close\"), Button_AI = iff(Button_AI==true, \"Open\", \"Close\"), Button_B0 = iff(Button_B0==true, \"Open\", \"Close\"),  Button_BI = iff(Button_BI==true, \"Open\", \"Close\")\
                 \n}\n\n\
                 .create-or-alter  function\
                 \nwith (folder='getDataSwitchDev')\
-                \ngetSwitchData(deviceId:string, timepsan:string ){\
+                \ngetSwitchData(name:string, timepsan:string ){\
                     \nlet myspan = case( ['timepsan'] == '5 minutes', 5m, ['timepsan'] == '10 minutes', 10m, ['timepsan'] == '30 minutes', 30m, ['timepsan'] == '1 hour', 1h, ['timepsan'] == '1 day', 1d, ['timepsan'] == '3 days', 3d, 7d);\
                     \nSwitchDevice\
                     \n| where Timestamp  > ago(myspan)\
-                    \n| where IotHubDeviceId == deviceId\
+                    \n| where Name == name\
                     \n| order by  Timestamp desc\
                 \n}\n\n\
                 .create-or-alter  function\
                 \nwith (folder='getDataSwitchDev')\
-                \ngetSwitchStatA0(deviceId:string, timepsan:string){\
+                \ngetSwitchStatA0(name:string, timepsan:string){\
                     \nlet myspan = case( ['timepsan'] == '5 minutes', 5m, ['timepsan'] == '10 minutes', 10m, ['timepsan'] == '30 minutes', 30m, ['timepsan'] == '1 hour', 1h, ['timepsan'] == '1 day', 1d, ['timepsan'] == '3 days', 3d, 7d);\
                     \nSwitchDevice\
-                    \n| where  IotHubDeviceId == deviceId\
+                    \n| where  Name == name\
                     \n| where Timestamp  > ago(myspan)\
                     \n| extend Button_A0=iff(Button_A0== \"true\", \"Open\", \"Close\"), Button_AI=iff(Button_AI== \"true\", \"Open\", \"Close\"),  Button_B0=iff(Button_B0== \"true\", \"Open\", \"Close\"),  Button_BI=iff(Button_BI== \"true\", \"Open\", \"Close\")\
                     \n| summarize  count() by Button_A0\
                 \n}\n\n\
                 .create-or-alter  function\
                 \nwith (folder='getDataSwitchDev')\
-                \ngetSwitchStatAI(deviceId:string, timepsan:string){\
+                \ngetSwitchStatAI(name:string, timepsan:string){\
                     \nlet myspan = case( ['timepsan'] == '5 minutes', 5m, ['timepsan'] == '10 minutes', 10m, ['timepsan'] == '30 minutes', 30m, ['timepsan'] == '1 hour', 1h, ['timepsan'] == '1 day', 1d, ['timepsan'] == '3 days', 3d, 7d);\
                     \nSwitchDevice\
-                    \n| where  IotHubDeviceId == deviceId\
+                    \n| where  Name == name\
                     \n| where Timestamp  > ago(myspan)\
                     \n| extend Button_A0=iff(Button_A0== \"true\", \"Open\", \"Close\"), Button_AI=iff(Button_AI== \"true\", \"Open\", \"Close\"),  Button_B0=iff(Button_B0== \"true\", \"Open\", \"Close\"),  Button_BI=iff(Button_BI== \"true\", \"Open\", \"Close\")\
                     \n| summarize  count() by Button_AI\
                 \n}\n\n\
                 .create-or-alter  function\
                 \nwith (folder='getDataSwitchDev')\
-                \ngetSwitchStatB0(deviceId:string, timepsan:string){\
+                \ngetSwitchStatB0(name:string, timepsan:string){\
                     \nlet myspan = case( ['timepsan'] == '5 minutes', 5m, ['timepsan'] == '10 minutes', 10m, ['timepsan'] == '30 minutes', 30m, ['timepsan'] == '1 hour', 1h, ['timepsan'] == '1 day', 1d, ['timepsan'] == '3 days', 3d, 7d);\
                     \nSwitchDevice\
-                    \n| where  IotHubDeviceId == deviceId\
+                    \n| where  Name == name\
                     \n| where Timestamp  > ago(myspan)\
                     \n| extend Button_A0=iff(Button_A0== \"true\", \"Open\", \"Close\"), Button_AI=iff(Button_AI== \"true\", \"Open\", \"Close\"),  Button_B0=iff(Button_B0== \"true\", \"Open\", \"Close\"),  Button_BI=iff(Button_BI== \"true\", \"Open\", \"Close\")\
                     \n| summarize  count() by Button_B0\
                 \n}\n\n\
                 .create-or-alter  function\
                 \nwith (folder='getDataSwitchDev')\
-                \ngetSwitchStatBI(deviceId:string, timepsan:string){\
+                \ngetSwitchStatBI(name:string, timepsan:string){\
                     \nlet myspan = case( ['timepsan'] == '5 minutes', 5m, ['timepsan'] == '10 minutes', 10m, ['timepsan'] == '30 minutes', 30m, ['timepsan'] == '1 hour', 1h, ['timepsan'] == '1 day', 1d, ['timepsan'] == '3 days', 3d, 7d);\
                     \nSwitchDevice\
-                    \n| where  IotHubDeviceId == deviceId\
+                    \n| where  Name == name\
                     \n| where Timestamp  > ago(myspan)\
                     \n| extend Button_A0=iff(Button_A0== \"true\", \"Open\", \"Close\"), Button_AI=iff(Button_AI== \"true\", \"Open\", \"Close\"),  Button_B0=iff(Button_B0== \"true\", \"Open\", \"Close\"),  Button_BI=iff(Button_BI== \"true\", \"Open\", \"Close\")\
                     \n| summarize  count() by Button_BI\
@@ -292,46 +292,46 @@ class DataExplorer:
                 \nwith (folder='getDataTempHumDev')\
                 \ngetTemphumIds(){\
                     \nTempHumDevice\
-                    \n| distinct IotHubDeviceId\
+                    \n| distinct IotHubDeviceId, Name\
                 \n}\n\n\
                 .create-or-alter function\
                 \nwith (folder='getDataTempHumDev')\
-                \ngetTemphumLastValue(deviceId:string){\
+                \ngetTemphumLastValue(name:string){\
                     \nTempHumDevice\
-                    \n| where  IotHubDeviceId == deviceId\
+                    \n| where  Name == name\
                     \n| top 1 by Timestamp\
                 \n}\n\n\
                 .create-or-alter  function\
                 \nwith (folder='getDataTempHumDev')\
-                    \ngetTemphumData(deviceId:string, timepsan:string ){\
+                    \ngetTemphumData(name:string, timepsan:string ){\
                     \nlet myspan = case( ['timepsan'] == '5 minutes', 5m, ['timepsan'] == '10 minutes', 10m, ['timepsan'] == '30 minutes', 30m, ['timepsan'] == '1 hour', 1h, ['timepsan'] == '1 day', 1d, ['timepsan'] == '3 days', 3d, 7d);\
                     \nTempHumDevice\
                     \n| where Timestamp  > ago(myspan)\
-                    \n| where IotHubDeviceId == deviceId\
+                    \n| where Name == name\
                     \n| order by  Timestamp desc\
                 \n}\n\n\
                 .create-or-alter  function\
                 \nwith (folder='getMultySensorDev')\
                     \ngetMultysensorIds(){\
                     \nMultySensorDevice\
-                    \n| distinct IotHubDeviceId\
+                    \n| distinct IotHubDeviceId,Name\
                 \n}\n\n\
                 .create-or-alter function\
                 \nwith (folder='getMultySensorDev')\
-                \ngetMultysensorLastValue(deviceId:string){\
+                \ngetMultysensorLastValue(name:string){\
                     \nMultySensorDevice\
-                    \n| where  IotHubDeviceId == deviceId\
+                    \n| where  Name == name\
                     \n| top 1 by Timestamp\
                     \n| extend Contact = iff(MagnetContact==true, \"Open\", \"Close\")\
                     \n| extend Accelomter_Status = case(AccelerationStatus==0, \"Normal\", AccelerationStatus==1, \"Warning\", AccelerationStatus==2, \"Crash\", \"not parsed\"), AccelerationStatus\
                 \n}\n\n\
                 .create-or-alter  function\
                 \nwith (folder='getMultySensorDev')\
-                \ngetMultysensorData(deviceId:string, timepsan:string ){\
+                \ngetMultysensorData(name:string, timepsan:string ){\
                     \nlet myspan = case( ['timepsan'] == '5 minutes', 5m, ['timepsan'] == '10 minutes', 10m, ['timepsan'] == '30 minutes', 30m, ['timepsan'] == '1 hour', 1h, ['timepsan'] == '1 day', 1d, ['timepsan'] == '3 days', 3d, 7d);\
                     \nMultySensorDevice\
                     \n| where Timestamp  > ago(myspan)\
-                    \n| where IotHubDeviceId == deviceId\
+                    \n| where Name == name\
                     \n| order by  Timestamp desc\
                     \n| extend Contact = iff(MagnetContact==true, \"Open\", \"Close\")\
                 \n}\n\n\

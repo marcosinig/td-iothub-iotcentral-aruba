@@ -157,39 +157,39 @@ class DataExplorer:
                 .create-or-alter table ['IotUnparsedData'] ingestion json mapping 'iot_unparsed_mapping' '[\
                     '\n'{\"column\":\"data\",\"path\":\"$\"}]'\n\n\
                 .alter-merge table IotUnparsedData policy retention softdelete = 7d \n\n\
-                .create table TempHumDevice(IotHubDeviceId: string, Timestamp: datetime, Location:string, Temperature:real,Humidity:real)\n\n\
+                .create table TempHumDevice(IotHubDeviceId: string, Name: string, Timestamp: datetime, Location:string, Temperature:real,Humidity:real)\n\n\
                 .create-or-alter  function parseTempHumDevice(){\
                     \nIotUnparsedData\
                     \n| where data.['type'] == '0031'\
                     \n| where isnotempty(data.['objectLastUpdated'])\
-                    \n| project IotHubDeviceId=tostring(data['iothub-connection-device-id']), Timestamp=todatetime(data['objectLastUpdated']), Location=tostring(data['location']), Temperature=toreal(data['temperature']), Humidity=toreal(data['humidity'])\
+                    \n| project IotHubDeviceId=tostring(data['iothub-connection-device-id']), Name=tostring(data['name']), Timestamp=todatetime(data['objectLastUpdated']), Location=tostring(data['location']), Temperature=toreal(data['temperature']), Humidity=toreal(data['humidity'])\
                     \n}\n\n\
                 .alter table TempHumDevice policy update \n\
                     @'[{ \"IsEnabled\": true, \"Source\": \"IotUnparsedData\", \"Query\": \"parseTempHumDevice()\", \"IsTransactional\": false, \"PropagateIngestionProperties\": false}]'\n\n\
-                .create table MagneticContactDevice(IotHubDeviceId: string, Timestamp: datetime,  Location:string, Contact: bool)\n\n\
+                .create table MagneticContactDevice(IotHubDeviceId: string, Name: string, Timestamp: datetime,  Location:string, Contact: bool)\n\n\
                     \n.create-or-alter  function parseMagneticContactDevice(){\
                     \nIotUnparsedData\
                     \n| where isnotempty(data.['objectLastUpdated'])\
                     \n| where data.['type'] == '0033'\
-                    \n| project IotHubDeviceId=tostring(data['iothub-connection-device-id']), Timestamp=todatetime(data['objectLastUpdated']), Location=tostring(data['location']),  Contact=tobool(data['contact'])\
+                    \n| project IotHubDeviceId=tostring(data['iothub-connection-device-id']),  Name=tostring(data['name']), Timestamp=todatetime(data['objectLastUpdated']), Location=tostring(data['location']),  Contact=tobool(data['contact'])\
                     \n}\n\n\
                 .alter table MagneticContactDevice policy update\n\
                      @'[{ \"IsEnabled\": true, \"Source\": \"IotUnparsedData\", \"Query\": \"parseMagneticContactDevice()\", \"IsTransactional\": false, \"PropagateIngestionProperties\": false}]'\n\n\
-                .create table SwitchDevice(IotHubDeviceId: string, Timestamp: datetime, Location:string, Button_A0:bool, Button_AI:bool, Button_B0:bool, Button_BI:bool)\n\n\
+                .create table SwitchDevice(IotHubDeviceId: string, Name: string, Timestamp: datetime, Location:string, Button_A0:bool, Button_AI:bool, Button_B0:bool, Button_BI:bool)\n\n\
                 .create-or-alter  function parseSwitchDevice(){\
                     \nIotUnparsedData\
                     \n| where isnotempty(data.['objectLastUpdated'])\
                     \n| where data.['type'] == '000B'\
-                    \n| project IotHubDeviceId=tostring(data['iothub-connection-device-id']), Timestamp=todatetime(data['objectLastUpdated']), Location=tostring(data['location']), Button_A0=tobool(data['button_A0']),  Button_AI=tobool(data['button_AI']), Button_B0=tobool(data['button_B0']), Button_BI=tobool(data['button_BI'])\
+                    \n| project IotHubDeviceId=tostring(data['iothub-connection-device-id']), Name=tostring(data['name']), Timestamp=todatetime(data['objectLastUpdated']), Location=tostring(data['location']), Button_A0=tobool(data['button_A0']),  Button_AI=tobool(data['button_AI']), Button_B0=tobool(data['button_B0']), Button_BI=tobool(data['button_BI'])\
                     \n}\n\n\
                 .alter table SwitchDevice policy update\n\
                     @'[{ \"IsEnabled\": true, \"Source\": \"IotUnparsedData\", \"Query\": \"parseSwitchDevice()\", \"IsTransactional\": false, \"PropagateIngestionProperties\": false}]'\n\n\
-                .create table MultySensorDevice(IotHubDeviceId: string, Timestamp: datetime, Location:string,Temperature:real,Humidity:real, MagnetContact:bool,  Illumination:int,Acceleration_X:real,Acceleration_Y:real,Acceleration_Z:real,AccelerationStatus:int)\n\n\
+                .create table MultySensorDevice(IotHubDeviceId: string, Name: string, Timestamp: datetime, Location:string,Temperature:real,Humidity:real, MagnetContact:bool,  Illumination:int,Acceleration_X:real,Acceleration_Y:real,Acceleration_Z:real,AccelerationStatus:int)\n\n\
                 .create-or-alter  function parseMultySensorDevice(){\
                     \nIotUnparsedData\
                     \n| where isnotempty(data.['objectLastUpdated'])\
                     \n| where data.['type'] == '0053'\
-                    \n| project IotHubDeviceId=tostring(data['iothub-connection-device-id']), Timestamp=todatetime(data['objectLastUpdated']), Location=tostring(data['location']), Temperature=toreal(data['temperature']), Humidity=toreal(data['humidity']),  MagnetContact=tobool(data['magnetContact']), Illumination=toint(data['illumination']), Acceleration_X=toreal(data['acceleration_X']),  Acceleration_Y=toreal(data['acceleration_Y']),  Acceleration_Z=toreal(data['acceleration_Z']), AccelerationStatus=toint(data['accelerationStatus'])\
+                    \n| project IotHubDeviceId=tostring(data['iothub-connection-device-id']), Name=tostring(data['name']), Timestamp=todatetime(data['objectLastUpdated']), Location=tostring(data['location']), Temperature=toreal(data['temperature']), Humidity=toreal(data['humidity']),  MagnetContact=tobool(data['magnetContact']), Illumination=toint(data['illumination']), Acceleration_X=toreal(data['acceleration_X']),  Acceleration_Y=toreal(data['acceleration_Y']),  Acceleration_Z=toreal(data['acceleration_Z']), AccelerationStatus=toint(data['accelerationStatus'])\
                     \n}\n\n\
                 .alter table MultySensorDevice policy update\n\
                     @'[{ \"IsEnabled\": true, \"Source\": \"IotUnparsedData\", \"Query\": \"parseMultySensorDevice()\", \"IsTransactional\": false, \"PropagateIngestionProperties\": false}]'\n\n\

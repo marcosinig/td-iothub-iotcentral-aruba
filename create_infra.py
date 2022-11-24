@@ -338,22 +338,22 @@ class DataExplorer:
                 .create-or-alter  function\
                 \nwith (folder='getAllDevices')\
                 \ngetDeviceList(){\
-                    \nlet a = TempHumDevice | summarize any( Location) by IotHubDeviceId;\
-                    \nlet b = MagneticContactDevice | summarize any( Location) by IotHubDeviceId;\
-                    \nlet c = SwitchDevice | summarize any( Location) by IotHubDeviceId;\
-                    \nlet d = MultySensorDevice | summarize any( Location) by IotHubDeviceId;\
+                    \nlet a = TempHumDevice | summarize any( Location, Name) by IotHubDeviceId;\
+                    \nlet b = MagneticContactDevice | summarize any( Location, Name) by IotHubDeviceId;\
+                    \nlet c = SwitchDevice | summarize any( Location, Name) by IotHubDeviceId;\
+                    \nlet d = MultySensorDevice | summarize any( Location, Name) by IotHubDeviceId;\
                     \nunion a,b,c,d\
-                    \n| project IotHubDeviceId, location = any_Location\
+                    \n| project IotHubDeviceId,  Name = any_Name, location = any_Location\
                 \n}\n\n\
                 .create-or-alter  function\
                 \nwith (folder='getAllDevices')\
                 \ngetDeviceOnline(){\
-                    \nlet a = TempHumDevice | summarize max(Timestamp) by IotHubDeviceId;\
-                    \nlet b = MagneticContactDevice | summarize max(Timestamp) by IotHubDeviceId;\
-                    \nlet c = SwitchDevice | summarize max(Timestamp) by IotHubDeviceId;\
-                    \nlet d = MultySensorDevice | summarize max(Timestamp) by IotHubDeviceId;\
+                    \nlet a = TempHumDevice | summarize max(Timestamp) by Name;\
+                    \nlet b = MagneticContactDevice | summarize max(Timestamp) by Name;\
+                    \nlet c = SwitchDevice | summarize max(Timestamp) by Name;\
+                    \nlet d = MultySensorDevice | summarize max(Timestamp) by Name;\
                     \nunion a,b,c,d\
-                    \n| project  IotHubDeviceId, Last_Device_payload = max_Timestamp\
+                    \n| project  Name, Last_Device_payload = max_Timestamp\
                     \n| extend Device_Status = iff(now() - Last_Device_payload > 12h, \"Offiline\", \"Online\")\
                 \n}\n\n\
                 ")           

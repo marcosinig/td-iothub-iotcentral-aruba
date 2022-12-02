@@ -118,7 +118,7 @@ volumes:
   mobius-data:
 services:
   mobius:
-    image: ghcr.io/mobiusflow/mobiusflow-le-tdc2r-aruba-hub:1.10.6-tdc2r-hub-rc.1_1.10.6
+    image: ghcr.io/mobiusflow/mobiusflow-le-tdc2r-aruba-hub:1.11.0-tdc2r-hub-rc.2_1.11.0
     container_name: mobiusflow
     privileged: false
     restart: always
@@ -150,7 +150,7 @@ services:
     
   tdc2rsetup:
     container_name: tdc2rsetup
-    image: ghcr.io/mobiusflow/tdc2r-setup:1.0.0-rc.2
+    image: ghcr.io/mobiusflow/tdc2r-setup:latest
     privileged: false
     restart: always
     ports:
@@ -164,7 +164,7 @@ volumes:
   mobius-data:
 services:
   mobius:
-    image: ghcr.io/mobiusflow/mobiusflow-le-tdc2r:1.10.0-tdc2r-rc.16_1.10.0
+    image: ghcr.io/mobiusflow/mobiusflow-le-tdc2r-aruba-cen:1.11.0-tdc2r-cen-rc.1_1.11.0
     container_name: mobiusflow
     privileged: false
     restart: always
@@ -190,7 +190,7 @@ services:
     
   tdc2rsetup:
     container_name: tdc2rsetup
-    image: ghcr.io/mobiusflow/tdc2r-setup:1.0.0-rc.2
+    image: ghcr.io/mobiusflow/tdc2r-setup:latest
     privileged: false
     restart: always
     ports:

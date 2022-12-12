@@ -150,7 +150,7 @@ services:
     
   tdc2rsetup:
     container_name: tdc2rsetup
-    image: ghcr.io/mobiusflow/tdc2r-setup:latest
+    image: ghcr.io/mobiusflow/tdc2r-setup:1.0.1
     privileged: false
     restart: always
     ports:
@@ -190,7 +190,7 @@ services:
     
   tdc2rsetup:
     container_name: tdc2rsetup
-    image: ghcr.io/mobiusflow/tdc2r-setup:latest
+    image: ghcr.io/mobiusflow/tdc2r-setup:1.0.1
     privileged: false
     restart: always
     ports:

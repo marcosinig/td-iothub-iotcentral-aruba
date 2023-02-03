@@ -190,7 +190,7 @@ services:
     
   tdc2rsetup:
     container_name: tdc2rsetup
-    image: ghcr.io/mobiusflow/tdc2r-setup:1.0.1
+    image: ghcr.io/mobiusflow/tdc2r-setup:1.0.4
     privileged: false
     restart: always
     ports:
